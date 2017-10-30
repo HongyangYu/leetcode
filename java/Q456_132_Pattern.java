@@ -7,11 +7,13 @@ import java.util.Deque;
 
 /*
  * https://leetcode.com/problems/132-pattern/
+ * Pattern (ai, aj, ak): ai<ak && ak < aj && i<j && j<k
  */
 public class Q456_132_Pattern {
 
     /* ---------------   Method 1   -------------------- */
     static class Method1 {
+        // Pattern (last.min, last.max, num)
         class Pair {
             int max;
             int min;
@@ -23,20 +25,20 @@ public class Q456_132_Pattern {
 
         public boolean find132pattern(int[] nums) {
             if (nums == null || nums.length < 3) return false;
-            Deque<Pair> stack = new ArrayDeque<>(); //Note [1]
+            Deque<Pair> stack = new ArrayDeque<>(); // Note [1]
             for (int num : nums) {
                 if (stack.isEmpty() || stack.peek().min > num) {
                     stack.push(new Pair(num, num));
                 } else if (num > stack.peek().min) {
                     Pair last = stack.pop();
-                    if (num < last.max) return true; // last.min < num and num < last.max
+                    if(last.max > num) return true;
                     // else: num > last.min but num >= last.max
                     last.max = num; //update max
                     while (!stack.isEmpty() && num >= stack.peek().max) {
                         stack.pop();
                     }
                     // if stack not empty, num < stack.peek().max after the while loop
-                    if (!stack.isEmpty() && stack.peek().min < num) return true;
+                    if(!stack.isEmpty() && stack.peek().min < num) return true;
                     stack.push(last);
                 }
             }
@@ -46,18 +48,19 @@ public class Q456_132_Pattern {
 
     /* ---------------   Method 2   -------------------- */
     static class Method2 {
+        // Pattern (num, stack.peek(), third)
         public boolean find132pattern(int[] nums) {
             if(nums==null || nums.length<3) return false;
-            Deque<Integer> stack = new ArrayDeque<>(); // numbers in stack should be in desc order
+            Deque<Integer> stack = new ArrayDeque<>(); // desc order
             int third = Integer.MIN_VALUE;
             for(int i = nums.length-1; i>=0; i--) {
                 int num = nums[i];
-                if(num < third) return true;
-                // to guarentee numbers in stack in desc order, and third < num (third num < second num)
+                if(num < third) return true; // num < third
+                // to guarantee stack in desc order, and third num < second num
                 while(!stack.isEmpty() && stack.peek() < num) {
                     third = stack.pop();
                 }
-                stack.push(num);
+                stack.push(num); // third < stack.peek()
             }
             return false;
         }
@@ -80,7 +83,7 @@ public class Q456_132_Pattern {
 
 
     public static void main(String[] args) {
-        int[] nums = {100, 50, 60, 40, 45, 20, 47, 55};
+        int[] nums = {100, 50, 60, 40, 45, 20, 47, 55, 65};
 
         boolean res1 = new Method1().find132pattern(nums);
         System.out.println("res1 = " + res1);
